@@ -98,6 +98,7 @@ wm=
 user_set_wm=false
 class=
 name=
+resize_window=true
 while getopts :h:w:x:y:s:n:c:C:l:L:p:P:u:U:d:f:-:amt opt
 do
 	case $opt in
@@ -322,8 +323,12 @@ update_geometry_settings_for_monitor() {
 }
 
 map_and_reset_geometry() {
-	xdotool windowmap "$wid" windowmove "$wid" "$xoff" "$yoff" \
+	if $resize_window;then
+		xdotool windowmap "$wid" windowmove "$wid" "$xoff" "$yoff" \
 		windowsize "$wid" "$width" "$height" 2> /dev/null
+	else
+		xdotool windowmap "$wid" windowmove "$wid" "$xoff" "$yoff" 2> /dev/null
+	fi
 }
 
 # * WM Detection and Hooks
@@ -664,6 +669,7 @@ wid_toggle() {
 		exists=false
 	fi
 	if $exists; then
+		resize_window=false
 		if [[ $visibility =~ ^(IsUnMapped|IsUnviewable)$ ]]; then
 			# visibility will be IsUnMapped on most WMs if the dropdown is open
 			# on another desktop; may also be IsUnviewable
@@ -692,6 +698,7 @@ wid_toggle() {
 		else
 			unmap
 		fi
+		resize_window=true
 	else
 		# necessary to deal with negative width or height
 		# if creating on an empty desktop and can't determine the monitor,
